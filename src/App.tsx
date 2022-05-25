@@ -20,7 +20,7 @@ class App extends React.Component {
     const container = document.getElementById("container");
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(new THREE.Color(0xffe5d4));
+    // renderer.setClearColor(new THREE.Color(0xffe5d4));
     renderer.shadowMap.enabled = true;
     container.appendChild(renderer.domElement);
 
@@ -40,7 +40,7 @@ class App extends React.Component {
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
     plane.position.set(0, -30, 0);
     plane.receiveShadow = true;
-    scene.add(plane);
+    // scene.add(plane);
 
     // cube
     const cubeGeometry = new THREE.BoxGeometry(30, 20, 20);
@@ -51,7 +51,7 @@ class App extends React.Component {
     const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
     cube.position.set(5, 0, 0);
     cube.castShadow = true;
-    scene.add(cube);
+    // scene.add(cube);
 
     // 基本光源
     // const ambientLight = new THREE.AmbientLight(0xcfffff);
@@ -61,15 +61,15 @@ class App extends React.Component {
     // 点光源
     // const spotLight = new THREE.SpotLight("#ffffff");
     // spotLight.castShadow = true;
-    // spotLight.target = cube;
+    // // spotLight.target = cube;
     // spotLight.position.set(-100, 100, -100);
     // scene.add(spotLight);
 
     // 平行光源
-    const directionalLight = new THREE.DirectionalLight("#ffffff");
+    const directionalLight = new THREE.DirectionalLight("#ffffff", 1);
     directionalLight.position.set(-50, 50, 50);
     directionalLight.castShadow = true;
-    // directionalLight.target = cube;
+    directionalLight.target = cube;
     directionalLight.shadow.camera.near = 2;
     directionalLight.shadow.camera.far = 200;
     directionalLight.shadow.camera.left = -50;
@@ -77,10 +77,9 @@ class App extends React.Component {
     directionalLight.shadow.camera.top = 50;
     directionalLight.shadow.camera.bottom = -50;
 
-    directionalLight.intensity = 0.5;
-    directionalLight.shadow.mapSize.width = 1024;
-    directionalLight.shadow.mapSize.height = 1024;
-
+    directionalLight.intensity = 1;
+    directionalLight.shadow.mapSize.width = 512 * 12;
+    directionalLight.shadow.mapSize.height = 512 * 12;
     scene.add(directionalLight);
 
     const shadowCamera = new THREE.CameraHelper(directionalLight.shadow.camera);
@@ -97,30 +96,59 @@ class App extends React.Component {
     camera.lookAt(scene.position);
 
     // 模型
-    // const loader = new GLTFLoader();
-    // loader.load(
-    //   bingdwendwenModel,
-    //   function (mesh) {
-    //     console.log(mesh, '[2333]')
-    //     // result.scene.scale.set(6, 6, 6);
-    //     // result.scene.translateY(-3);
-    //     // result.scene.rotateY(-0.3 * Math.PI);
+    const loader = new GLTFLoader();
+    loader.load(bingdwendwenModel, function (mesh) {
+      console.log(mesh, "[2333]");
 
-    //     mesh.scene.rotation.y = Math.PI / 24;
-    //     mesh.scene.position.set(-5, -11.5, 0);
-    //     mesh.scene.scale.set(0, 0, 0);
-    //     scene.add(mesh.scene);
+      // result.scene.scale.set(6, 6, 6);
+      // result.scene.translateY(-3);
+      // result.scene.rotateY(-0.3 * Math.PI);
 
-    //     // setup the mixer
-    //     // const mixer = new THREE.AnimationMixer(result.scene);
-    //     // let animationClip = result.animations[0];
-    //     // const clipAction = mixer.clipAction(animationClip).play();
-    //     // animationClip = clipAction.getClip();
+      // setup the mixer
+      // const mixer = new THREE.AnimationMixer(result.scene);
+      // let animationClip = result.animations[0];
+      // const clipAction = mixer.clipAction(animationClip).play();
+      // animationClip = clipAction.getClip();
 
-    //     // add the animation controls
-    //     // enableControls();
-    //   }
-    // );
+      // add the animation controls
+      // enableControls();
+
+      mesh.scene.traverse(function (child: THREE.Mesh) {
+        console.log(child, '[2222]')
+        const material = child.material as THREE.MeshStandardMaterial
+        if (child.isMesh) {
+          // meshes.push(child)
+
+          if (child.name === '皮肤') {
+            material.metalness = .3;
+            material.roughness = .8;
+          }
+
+          if (child.name === '外壳') {
+            material.transparent = true;
+            material.opacity = .4;
+            material.metalness = .4;
+            material.roughness = 0;
+            (material as any).refractionRatio = 1.6;
+            child.castShadow = true;
+            // material.envMap = new THREE.TextureLoader().load(skyTexture);
+            material.envMapIntensity = 1;
+          }
+
+          if (child.name === '围脖') {
+            material.transparent = true;
+            material.opacity = .6;
+            material.metalness = .4;
+            material.roughness = .6;
+          }
+        }
+      });
+
+      mesh.scene.rotation.y = Math.PI / 24;
+      mesh.scene.position.set(0, 0, 0);
+      mesh.scene.scale.set(150, 150, 150);
+      scene.add(mesh.scene);
+    });
 
     const trackballControls = this.initTrackballControls(camera, renderer);
     const clock = new THREE.Clock();

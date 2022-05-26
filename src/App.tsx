@@ -7,6 +7,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 // 模型
 import bingdwendwenModel from "./models/bingdwendwen.glb";
+import landModel from './models/land.glb';
 // 样式
 import "./App.css";
 
@@ -28,8 +29,8 @@ class App extends React.Component {
     const scene: THREE.Scene = new THREE.Scene();
 
     // 显示坐标轴
-    const axes = new THREE.AxesHelper(100);
-    scene.add(axes);
+    // const axes = new THREE.AxesHelper(100);
+    // scene.add(axes);
 
     // 平面
     const planeGeometry = new THREE.BoxGeometry(200, 1, 200);
@@ -82,8 +83,8 @@ class App extends React.Component {
     directionalLight.shadow.mapSize.height = 512 * 12;
     scene.add(directionalLight);
 
-    const shadowCamera = new THREE.CameraHelper(directionalLight.shadow.camera);
-    scene.add(shadowCamera);
+    // const shadowCamera = new THREE.CameraHelper(directionalLight.shadow.camera);
+    // scene.add(shadowCamera);
 
     // camera
     const camera = new THREE.PerspectiveCamera(
@@ -92,11 +93,44 @@ class App extends React.Component {
       0.1,
       1000
     );
-    camera.position.set(100, 100, 100);
+    camera.position.set(0, 50, 100);
     camera.lookAt(scene.position);
 
     // 模型
     const loader = new GLTFLoader();
+
+    // 地面
+    loader.load(landModel, function (mesh) {
+      mesh.scene.traverse(function (child: THREE.Mesh) {
+        const material = child.material as THREE.MeshStandardMaterial;
+        if (child.isMesh) {
+          // meshes.push(child);
+          material.metalness = 0.1;
+          material.roughness = 0.8;
+          // 地面
+          if (child.name === "Mesh_2") {
+            material.metalness = 0.5;
+            child.receiveShadow = true;
+          }
+          // 围巾
+          if (child.name === "Mesh_17") {
+            material.metalness = 0.2;
+            material.roughness = 0.8;
+          }
+          // 帽子
+          if (child.name === "Mesh_17") {
+          }
+        }
+      });
+
+      mesh.scene.rotation.y = Math.PI / 4;
+      mesh.scene.position.set(15, -15, 0);
+      mesh.scene.scale.set(2, 2, 2);
+
+      scene.add(mesh.scene);
+    });
+
+    // 冰墩墩
     loader.load(bingdwendwenModel, function (mesh) {
       console.log(mesh, "[2333]");
 
@@ -114,20 +148,20 @@ class App extends React.Component {
       // enableControls();
 
       mesh.scene.traverse(function (child: THREE.Mesh) {
-        console.log(child, '[2222]')
-        const material = child.material as THREE.MeshStandardMaterial
+        // console.log(child, '[2222]')
+        const material = child.material as THREE.MeshStandardMaterial;
         if (child.isMesh) {
           // meshes.push(child)
 
-          if (child.name === '皮肤') {
-            material.metalness = .3;
-            material.roughness = .8;
+          if (child.name === "皮肤") {
+            material.metalness = 0.3;
+            material.roughness = 0.8;
           }
 
-          if (child.name === '外壳') {
+          if (child.name === "外壳") {
             material.transparent = true;
-            material.opacity = .4;
-            material.metalness = .4;
+            material.opacity = 0.4;
+            material.metalness = 0.4;
             material.roughness = 0;
             (material as any).refractionRatio = 1.6;
             child.castShadow = true;
@@ -135,18 +169,18 @@ class App extends React.Component {
             material.envMapIntensity = 1;
           }
 
-          if (child.name === '围脖') {
+          if (child.name === "围脖") {
             material.transparent = true;
-            material.opacity = .6;
-            material.metalness = .4;
-            material.roughness = .6;
+            material.opacity = 0.6;
+            material.metalness = 0.4;
+            material.roughness = 0.6;
           }
         }
       });
 
       mesh.scene.rotation.y = Math.PI / 24;
       mesh.scene.position.set(0, 0, 0);
-      mesh.scene.scale.set(150, 150, 150);
+      mesh.scene.scale.set(100, 100, 100);
       scene.add(mesh.scene);
     });
 

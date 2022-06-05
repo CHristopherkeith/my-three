@@ -9,8 +9,10 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import bingdwendwenModel from "./models/bingdwendwen.glb";
 import landModel from "./models/land.glb";
 import treeModel from "./models/tree.gltf";
+import flagModel from './models/flag.glb';
 // 贴图
 import treeTexture from "./images/tree.png";
+import flagTexture from './images/flag.png';
 // 样式
 import "./App.css";
 
@@ -127,7 +129,7 @@ class App extends React.Component {
       });
 
       mesh.scene.rotation.y = Math.PI / 4;
-      mesh.scene.position.set(15, -15, 0);
+      mesh.scene.position.set(35, -15, 0);
       mesh.scene.scale.set(2, 2, 2);
 
       scene.add(mesh.scene);
@@ -167,7 +169,7 @@ class App extends React.Component {
       });
 
       mesh.scene.rotation.y = -Math.PI / 12;
-      mesh.scene.position.set(0, 0, 0);
+      mesh.scene.position.set(-10, 0, 15);
       mesh.scene.scale.set(100, 100, 100);
       scene.add(mesh.scene);
     });
@@ -186,6 +188,7 @@ class App extends React.Component {
       reflectivity: 0.1,
       // refractionRatio: 0,
     });
+
 
     const treeCustomDepthMaterial = new THREE.MeshDepthMaterial({
       depthPacking: THREE.RGBADepthPacking,
@@ -208,7 +211,7 @@ class App extends React.Component {
 
       let tree2 = mesh.scene.clone();
       tree2.position.set(-55, -0, -15);
-      tree2.scale.set(23,23,23);
+      tree2.scale.set(23, 23, 23);
       scene.add(tree2);
 
       // let tree3 = mesh.scene.clone();
@@ -217,10 +220,55 @@ class App extends React.Component {
       // scene.add(tree3);
     });
 
+    // 旗帜
+    let mixerObj= {value:undefined};
+    loader.load(flagModel, (mesh) => {
+      mesh.scene.traverse((child:THREE.Mesh) => {
+        if (child.isMesh) {
+          // meshes.push(child);
+          child.castShadow = true;
+          const material = child.material as THREE.MeshStandardMaterial;
+
+          // 旗帜
+          if (child.name === "mesh_0001") {
+            material.metalness = 0.1;
+            material.roughness = 0.1;
+            material.map = new THREE.TextureLoader().load(flagTexture);
+          }
+
+          // 旗杆
+          if (child.name === "柱体") {
+            material.metalness = 0.6;
+            material.roughness = 0;
+            // material.refractionRatio = 1;
+            material.color = new THREE.Color(0xeeeeee);
+          }
+        }
+      });
+
+      mesh.scene.rotation.y = Math.PI / 24;
+      mesh.scene.position.set(15, 10, 30);
+      mesh.scene.scale.set(13, 13, 13);
+
+      // // 动画
+      const meshAnimation = mesh.animations[0];
+      mixerObj.value = new THREE.AnimationMixer(mesh.scene);
+      console.log(mixerObj.value, 666)
+
+      let animationClip = meshAnimation;
+      let clipAction = mixerObj.value.clipAction(animationClip).play();
+
+      animationClip = clipAction.getClip();
+
+      scene.add(mesh.scene);
+    });
+
     const trackballControls = this.initTrackballControls(camera, renderer);
     const clock = new THREE.Clock();
 
-    this.renderScene({ renderer, scene, camera, trackballControls, clock });
+    console.log(mixerObj.value, 6666)
+
+    this.renderScene({ renderer, scene, camera, trackballControls, clock, mixer:mixerObj });
   }
 
   renderScene(
@@ -232,14 +280,17 @@ class App extends React.Component {
       scene: THREE.Scene;
       camera: THREE.Camera;
       trackballControls: TrackballControls;
+      mixer:{value:THREE.AnimationMixer};
       clock: THREE.Clock;
     }
   ) {
     // console.log(111)
-    const { renderer, scene, camera, trackballControls, clock } = renderObj;
+    const { renderer, scene, camera, trackballControls, clock, mixer } = renderObj;
     trackballControls.update();
     requestAnimationFrame(this.renderScene.bind(this, renderObj));
     renderer.render(scene, camera);
+    // console.log(mixer.value, '[mixer]');
+    mixer.value && mixer.value.update(clock.getDelta());
   }
 
   initTrackballControls(camera: THREE.Camera, renderer: THREE.Renderer) {

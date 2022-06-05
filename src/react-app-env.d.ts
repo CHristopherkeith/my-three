@@ -71,3 +71,5 @@ declare module '*.module.sass' {
 }
 
 declare module '*.glb'
+
+declare module '*.gltf'

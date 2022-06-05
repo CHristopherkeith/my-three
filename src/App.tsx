@@ -7,7 +7,10 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 // 模型
 import bingdwendwenModel from "./models/bingdwendwen.glb";
-import landModel from './models/land.glb';
+import landModel from "./models/land.glb";
+import treeModel from "./models/tree.gltf";
+// 贴图
+import treeTexture from "./images/tree.png";
 // 样式
 import "./App.css";
 
@@ -29,8 +32,8 @@ class App extends React.Component {
     const scene: THREE.Scene = new THREE.Scene();
 
     // 显示坐标轴
-    // const axes = new THREE.AxesHelper(100);
-    // scene.add(axes);
+    const axes = new THREE.AxesHelper(100);
+    scene.add(axes);
 
     // 平面
     const planeGeometry = new THREE.BoxGeometry(200, 1, 200);
@@ -83,8 +86,8 @@ class App extends React.Component {
     directionalLight.shadow.mapSize.height = 512 * 12;
     scene.add(directionalLight);
 
-    // const shadowCamera = new THREE.CameraHelper(directionalLight.shadow.camera);
-    // scene.add(shadowCamera);
+    const shadowCamera = new THREE.CameraHelper(directionalLight.shadow.camera);
+    scene.add(shadowCamera);
 
     // camera
     const camera = new THREE.PerspectiveCamera(
@@ -93,7 +96,7 @@ class App extends React.Component {
       0.1,
       1000
     );
-    camera.position.set(0, 50, 100);
+    camera.position.set(-20, 40, 150);
     camera.lookAt(scene.position);
 
     // 模型
@@ -132,21 +135,6 @@ class App extends React.Component {
 
     // 冰墩墩
     loader.load(bingdwendwenModel, function (mesh) {
-      console.log(mesh, "[2333]");
-
-      // result.scene.scale.set(6, 6, 6);
-      // result.scene.translateY(-3);
-      // result.scene.rotateY(-0.3 * Math.PI);
-
-      // setup the mixer
-      // const mixer = new THREE.AnimationMixer(result.scene);
-      // let animationClip = result.animations[0];
-      // const clipAction = mixer.clipAction(animationClip).play();
-      // animationClip = clipAction.getClip();
-
-      // add the animation controls
-      // enableControls();
-
       mesh.scene.traverse(function (child: THREE.Mesh) {
         // console.log(child, '[2222]')
         const material = child.material as THREE.MeshStandardMaterial;
@@ -178,10 +166,55 @@ class App extends React.Component {
         }
       });
 
-      mesh.scene.rotation.y = Math.PI / 24;
+      mesh.scene.rotation.y = -Math.PI / 12;
       mesh.scene.position.set(0, 0, 0);
       mesh.scene.scale.set(100, 100, 100);
       scene.add(mesh.scene);
+    });
+
+    // 树
+    const treeMaterial = new THREE.MeshPhysicalMaterial({
+      map: new THREE.TextureLoader().load(treeTexture),
+      transparent: true,
+      side: THREE.DoubleSide,
+      metalness: 0.2,
+      roughness: 0.8,
+      depthTest: true,
+      depthWrite: false,
+      // skinning: false,
+      fog: false,
+      reflectivity: 0.1,
+      // refractionRatio: 0,
+    });
+
+    const treeCustomDepthMaterial = new THREE.MeshDepthMaterial({
+      depthPacking: THREE.RGBADepthPacking,
+      map: new THREE.TextureLoader().load(treeTexture),
+      alphaTest: 0.5,
+    });
+
+    loader.load(treeModel, function (mesh) {
+      mesh.scene.traverse(function (child: THREE.Mesh) {
+        if (child.isMesh) {
+          // meshes.push(child);
+          child.material = treeMaterial;
+          (child as any).custromMaterial = treeCustomDepthMaterial;
+        }
+      });
+
+      mesh.scene.position.set(-40, 0, 25);
+      mesh.scene.scale.set(20, 20, 20);
+      scene.add(mesh.scene);
+
+      let tree2 = mesh.scene.clone();
+      tree2.position.set(-55, -0, -15);
+      tree2.scale.set(23,23,23);
+      scene.add(tree2);
+
+      // let tree3 = mesh.scene.clone();
+      // tree3.position.set(-18, -8, -16);
+      // tree3.scale.set(22, 22, 22);
+      // scene.add(tree3);
     });
 
     const trackballControls = this.initTrackballControls(camera, renderer);

@@ -9,10 +9,10 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import bingdwendwenModel from "./models/bingdwendwen.glb";
 import landModel from "./models/land.glb";
 import treeModel from "./models/tree.gltf";
-import flagModel from './models/flag.glb';
+import flagModel from "./models/flag.glb";
 // 贴图
 import treeTexture from "./images/tree.png";
-import flagTexture from './images/flag.png';
+import flagTexture from "./images/flag.png";
 // 样式
 import "./App.css";
 
@@ -80,7 +80,7 @@ class App extends React.Component {
     directionalLight.shadow.camera.far = 200;
     directionalLight.shadow.camera.left = -50;
     directionalLight.shadow.camera.right = 50;
-    directionalLight.shadow.camera.top = 50;
+    directionalLight.shadow.camera.top = 100;
     directionalLight.shadow.camera.bottom = -50;
 
     directionalLight.intensity = 1;
@@ -189,7 +189,6 @@ class App extends React.Component {
       // refractionRatio: 0,
     });
 
-
     const treeCustomDepthMaterial = new THREE.MeshDepthMaterial({
       depthPacking: THREE.RGBADepthPacking,
       map: new THREE.TextureLoader().load(treeTexture),
@@ -221,9 +220,9 @@ class App extends React.Component {
     });
 
     // 旗帜
-    let mixerObj= {value:undefined};
+    let mixerObj = { value: undefined };
     loader.load(flagModel, (mesh) => {
-      mesh.scene.traverse((child:THREE.Mesh) => {
+      mesh.scene.traverse((child: THREE.Mesh) => {
         if (child.isMesh) {
           // meshes.push(child);
           child.castShadow = true;
@@ -253,7 +252,7 @@ class App extends React.Component {
       // // 动画
       const meshAnimation = mesh.animations[0];
       mixerObj.value = new THREE.AnimationMixer(mesh.scene);
-      console.log(mixerObj.value, 666)
+      console.log(mixerObj.value, 666);
 
       let animationClip = meshAnimation;
       let clipAction = mixerObj.value.clipAction(animationClip).play();
@@ -263,12 +262,55 @@ class App extends React.Component {
       scene.add(mesh.scene);
     });
 
+    // 五环
+    const fiveCyclesGroup = new THREE.Group();
+    const fiveCycles = [
+      // blue
+      { key: "cycle_0", color: 0x0885c2, position: { x: -250, y: 0, z: 0 } },
+      // black
+      { key: "cycle_1", color: 0x000000, position: { x: -10, y: 0, z: 5 } },
+      // red
+      { key: "cycle_2", color: 0xed334e, position: { x: 230, y: 0, z: 0 } },
+      // yellow
+      {
+        key: "cycle_3",
+        color: 0xfbb132,
+        position: { x: -125, y: -100, z: -5 },
+      },
+      // green
+      { key: "cycle_4", color: 0x1c8b3c, position: { x: 115, y: -100, z: 10 } },
+    ];
+
+    fiveCycles.map((item) => {
+      let cycleMesh = new THREE.Mesh(
+        new THREE.TorusGeometry(100, 10, 10, 50),
+        new THREE.MeshLambertMaterial({
+          color: new THREE.Color(item.color),
+          side: THREE.DoubleSide,
+        })
+      );
+
+      cycleMesh.castShadow = true;
+      cycleMesh.position.set(item.position.x, item.position.y, item.position.z);
+      // meshes.push(cycleMesh);
+      fiveCyclesGroup.add(cycleMesh);
+    });
+
+    fiveCyclesGroup.scale.set(0.1, 0.1, 0.1);
+    fiveCyclesGroup.position.set(0, 50, 0);
+    scene.add(fiveCyclesGroup);
+
     const trackballControls = this.initTrackballControls(camera, renderer);
     const clock = new THREE.Clock();
 
-    console.log(mixerObj.value, 6666)
-
-    this.renderScene({ renderer, scene, camera, trackballControls, clock, mixer:mixerObj });
+    this.renderScene({
+      renderer,
+      scene,
+      camera,
+      trackballControls,
+      clock,
+      mixer: mixerObj,
+    });
   }
 
   renderScene(
@@ -280,12 +322,13 @@ class App extends React.Component {
       scene: THREE.Scene;
       camera: THREE.Camera;
       trackballControls: TrackballControls;
-      mixer:{value:THREE.AnimationMixer};
+      mixer: { value: THREE.AnimationMixer };
       clock: THREE.Clock;
     }
   ) {
     // console.log(111)
-    const { renderer, scene, camera, trackballControls, clock, mixer } = renderObj;
+    const { renderer, scene, camera, trackballControls, clock, mixer } =
+      renderObj;
     trackballControls.update();
     requestAnimationFrame(this.renderScene.bind(this, renderObj));
     renderer.render(scene, camera);

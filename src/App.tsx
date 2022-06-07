@@ -13,6 +13,7 @@ import flagModel from "./models/flag.glb";
 // 贴图
 import treeTexture from "./images/tree.png";
 import flagTexture from "./images/flag.png";
+import snowTexture from "./images/snow.png";
 // 样式
 import "./App.css";
 
@@ -299,6 +300,49 @@ class App extends React.Component {
     fiveCyclesGroup.scale.set(0.1, 0.1, 0.1);
     fiveCyclesGroup.position.set(0, 50, 0);
     scene.add(fiveCyclesGroup);
+
+    // 雪花
+    const texture = new THREE.TextureLoader().load(snowTexture);
+    const geometry = new THREE.BufferGeometry();
+    const pointsMaterial = new THREE.PointsMaterial({
+      size: 1,
+      transparent: true,
+      opacity: 0.8,
+      map: texture,
+      blending: THREE.AdditiveBlending,
+      sizeAttenuation: true,
+      depthTest: false,
+    });
+
+    let range = 100;
+    // let vertices/* : THREE.Vector3[]  */= [];
+    let vertices: number[] = [];
+    for (let i = 0; i < 1500; i++) {
+      // let vertice = new THREE.Vector3(
+      //   Math.random() * range - range / 2,
+      //   Math.random() * range * 1.5,
+      //   Math.random() * range - range / 2
+      // );
+      const vertice = [
+        Math.random() * range - range / 2,
+        Math.random() * range * 1.5,
+        Math.random() * range - range / 2,
+      ];
+      // 纵向移动速度
+      // (vertice as any).velocityY = 0.1 + Math.random() / 3;
+      // // 横向移动速度
+      // (vertice as any).velocityX = (Math.random() - 0.5) / 3;
+
+      /* geometry. */ vertices.push(...vertice);
+    }
+    // 将顶点加入几何
+    console.log(vertices, '[vertices]')
+    geometry.addAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+
+    geometry.center();
+    let points = new THREE.Points(geometry, pointsMaterial);
+    points.position.y = -30;
+    scene.add(points);
 
     const trackballControls = this.initTrackballControls(camera, renderer);
     const clock = new THREE.Clock();

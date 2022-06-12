@@ -7,13 +7,14 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 // 模型
 import bingdwendwenModel from "./models/bingdwendwen.glb";
+import xuerongrongModel from './models/xuerongrong.glb';
 import landModel from "./models/land.glb";
 import treeModel from "./models/tree.gltf";
 import flagModel from "./models/flag.glb";
 // 贴图
 import treeTexture from "./images/tree.png";
 import flagTexture from "./images/flag.png";
-import snowTexture from "./images/snow.png";
+import snowTexture from "./images/snowflake2.png";
 // 样式
 import "./App.css";
 
@@ -36,7 +37,9 @@ class App extends React.Component {
 
     // 显示坐标轴
     const axes = new THREE.AxesHelper(100);
-    scene.add(axes);
+    // scene.add(axes);
+    scene.position.y = -20;
+    scene.scale.set(1.7,1.7,1.7)
 
     // 平面
     const planeGeometry = new THREE.BoxGeometry(200, 1, 200);
@@ -61,9 +64,9 @@ class App extends React.Component {
     // scene.add(cube);
 
     // 基本光源
-    // const ambientLight = new THREE.AmbientLight(0xcfffff);
-    // ambientLight.intensity = 0.5;
-    // scene.add(ambientLight);
+    const ambientLight = new THREE.AmbientLight(0xcfffff);
+    ambientLight.intensity = 0.5;
+    scene.add(ambientLight);
 
     // 点光源
     // const spotLight = new THREE.SpotLight("#ffffff");
@@ -78,10 +81,10 @@ class App extends React.Component {
     directionalLight.castShadow = true;
     directionalLight.target = cube;
     directionalLight.shadow.camera.near = 2;
-    directionalLight.shadow.camera.far = 200;
-    directionalLight.shadow.camera.left = -50;
-    directionalLight.shadow.camera.right = 50;
-    directionalLight.shadow.camera.top = 100;
+    directionalLight.shadow.camera.far = 400;
+    directionalLight.shadow.camera.left = -100;
+    directionalLight.shadow.camera.right = 100;
+    directionalLight.shadow.camera.top = 150;
     directionalLight.shadow.camera.bottom = -50;
 
     directionalLight.intensity = 1;
@@ -90,7 +93,7 @@ class App extends React.Component {
     scene.add(directionalLight);
 
     const shadowCamera = new THREE.CameraHelper(directionalLight.shadow.camera);
-    scene.add(shadowCamera);
+    // scene.add(shadowCamera);
 
     // camera
     const camera = new THREE.PerspectiveCamera(
@@ -99,7 +102,8 @@ class App extends React.Component {
       0.1,
       1000
     );
-    camera.position.set(-20, 40, 150);
+    camera.position.set(-20, 85, 150);
+    // camera.zoom = 2
     camera.lookAt(scene.position);
 
     // 模型
@@ -175,6 +179,22 @@ class App extends React.Component {
       scene.add(mesh.scene);
     });
 
+    // 雪容融
+    loader.load(xuerongrongModel, function (mesh) {
+      mesh.scene.traverse(function (child: THREE.Mesh) {
+        if (child.isMesh) {
+          child.castShadow = true;
+          // meshes.push(child)
+        }
+      });
+
+      mesh.scene.rotation.y = Math.PI / 8;
+      mesh.scene.position.set(-60, 10, 10);
+      mesh.scene.scale.set(40, 40, 40);
+
+      scene.add(mesh.scene);
+    });
+
     // 树
     const treeMaterial = new THREE.MeshPhysicalMaterial({
       map: new THREE.TextureLoader().load(treeTexture),
@@ -205,13 +225,13 @@ class App extends React.Component {
         }
       });
 
-      mesh.scene.position.set(-40, 0, 25);
-      mesh.scene.scale.set(20, 20, 20);
+      mesh.scene.position.set(55, 0, 35);
+      mesh.scene.scale.set(60, 60, 60);
       scene.add(mesh.scene);
 
       let tree2 = mesh.scene.clone();
-      tree2.position.set(-55, -0, -15);
-      tree2.scale.set(23, 23, 23);
+      tree2.position.set(-65, -0, -25);
+      tree2.scale.set(70, 70, 70);
       scene.add(tree2);
 
       // let tree3 = mesh.scene.clone();
@@ -253,12 +273,8 @@ class App extends React.Component {
       // // 动画
       const meshAnimation = mesh.animations[0];
       mixerObj.value = new THREE.AnimationMixer(mesh.scene);
-      console.log(mixerObj.value, 666);
 
-      let animationClip = meshAnimation;
-      let clipAction = mixerObj.value.clipAction(animationClip).play();
-
-      animationClip = clipAction.getClip();
+      let clipAction = mixerObj.value.clipAction(meshAnimation).play();
 
       scene.add(mesh.scene);
     });
@@ -305,7 +321,7 @@ class App extends React.Component {
     const texture = new THREE.TextureLoader().load(snowTexture);
     const geometry = new THREE.BufferGeometry();
     const pointsMaterial = new THREE.PointsMaterial({
-      size: 1,
+      size: 3.5,
       transparent: true,
       opacity: 0.8,
       map: texture,
@@ -315,34 +331,47 @@ class App extends React.Component {
     });
 
     let range = 100;
-    // let vertices/* : THREE.Vector3[]  */= [];
-    let vertices: number[] = [];
+    let vertices: THREE.Vector3[] = [];
+    // let vertices: number[] = [];
     for (let i = 0; i < 1500; i++) {
-      // let vertice = new THREE.Vector3(
-      //   Math.random() * range - range / 2,
-      //   Math.random() * range * 1.5,
-      //   Math.random() * range - range / 2
-      // );
-      const vertice = [
+      let vertice = new THREE.Vector3(
         Math.random() * range - range / 2,
         Math.random() * range * 1.5,
-        Math.random() * range - range / 2,
-      ];
+        Math.random() * range - range / 2
+      );
+      // const vertice = [
+      //   Math.random() * range - range / 2,
+      //   Math.random() * range * 1.5,
+      //   Math.random() * range - range / 2,
+      // ];
       // 纵向移动速度
-      // (vertice as any).velocityY = 0.1 + Math.random() / 3;
-      // // 横向移动速度
-      // (vertice as any).velocityX = (Math.random() - 0.5) / 3;
+      (vertice as any).velocityY = 0.1 + Math.random() / 3;
+      // // // 横向移动速度
+      (vertice as any).velocityX = (Math.random() - 0.5) / 3;
 
-      /* geometry. */ vertices.push(...vertice);
+      vertices.push(vertice);
     }
-    // 将顶点加入几何
-    console.log(vertices, '[vertices]')
-    geometry.addAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+    // console.log(vertices, '[vertices]')
+    // let positionArr = vertices.reduce((acc, item) => {
+    //   acc = acc.concat(...item);
+    //   return acc;
+    // }, []);
+    // geometry.setAttribute(
+    //   "position",
+    //   new THREE.Float32BufferAttribute(positionArr, 3)
+    // );
+    geometry.setFromPoints(vertices);
 
     geometry.center();
     let points = new THREE.Points(geometry, pointsMaterial);
-    points.position.y = -30;
+    points.position.y = -15;
+    points.scale.set(1.8, 1.8, 1.8);
     scene.add(points);
+    console.log(points, "[points]");
+    console.log(points.geometry.attributes.position.array, "[points.geometry]");
+    console.log(vertices, "[vertices]");
+
+    // let pVertices = points.geometry.vertices;
 
     const trackballControls = this.initTrackballControls(camera, renderer);
     const clock = new THREE.Clock();
@@ -354,13 +383,12 @@ class App extends React.Component {
       trackballControls,
       clock,
       mixer: mixerObj,
+      vertices,
+      points,
     });
   }
 
   renderScene(
-    // renderer: THREE.WebGLRenderer,
-    // scene: THREE.Scene,
-    // camera: THREE.Camera
     renderObj: {
       renderer: THREE.WebGLRenderer;
       scene: THREE.Scene;
@@ -368,15 +396,47 @@ class App extends React.Component {
       trackballControls: TrackballControls;
       mixer: { value: THREE.AnimationMixer };
       clock: THREE.Clock;
+      vertices: any[];
+      points: THREE.Points;
     }
   ) {
     // console.log(111)
-    const { renderer, scene, camera, trackballControls, clock, mixer } =
-      renderObj;
+    const {
+      renderer,
+      scene,
+      camera,
+      trackballControls,
+      clock,
+      mixer,
+      vertices,
+      points,
+    } = renderObj;
     trackballControls.update();
     requestAnimationFrame(this.renderScene.bind(this, renderObj));
     renderer.render(scene, camera);
-    // console.log(mixer.value, '[mixer]');
+    // 雪花
+    vertices.forEach(function (v) {
+      v.y = v.y - v.velocityY;
+      v.x = v.x - v.velocityX;
+      if (v.y <= 0) v.y = 60;
+      if (v.x <= -20 || v.x >= 20) v.velocityX = v.velocityX * -1;
+      // v[1] = v[1] - v.velocityY;
+      // v[0] = v[0] - v.velocityX;
+      // if (v[1] <= 0) v[1] = 60;
+      // if (v[0] <= -20 || v[0] >= 20) v.velocityX = v.velocityX * -1;
+    });
+    points.geometry.setFromPoints(vertices);
+
+    // let positionArr = vertices.reduce((acc, item) => {
+    //   acc = acc.concat(...item);
+    //   return acc;
+    // }, []);
+    // points.geometry.setAttribute(
+    //   "position",
+    //   new THREE.Float32BufferAttribute(positionArr, 3)
+    // );
+    
+
     mixer.value && mixer.value.update(clock.getDelta());
   }
 

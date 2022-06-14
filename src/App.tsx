@@ -15,6 +15,7 @@ import flagModel from "./models/flag.glb";
 import treeTexture from "./images/tree.png";
 import flagTexture from "./images/flag.png";
 import snowTexture from "./images/snowflake2.png";
+import skyTexture from './images/sky.jpg';
 // 样式
 import "./App.css";
 
@@ -34,6 +35,8 @@ class App extends React.Component {
 
     // scene
     const scene: THREE.Scene = new THREE.Scene();
+    scene.background = new THREE.TextureLoader().load(skyTexture);
+    // scene.fog = new THREE.Fog(0xffffff, 10, 100);
 
     // 显示坐标轴
     const axes = new THREE.AxesHelper(100);
@@ -65,7 +68,7 @@ class App extends React.Component {
 
     // 基本光源
     const ambientLight = new THREE.AmbientLight(0xcfffff);
-    ambientLight.intensity = 0.5;
+    ambientLight.intensity = 1;
     scene.add(ambientLight);
 
     // 点光源
@@ -160,7 +163,7 @@ class App extends React.Component {
             material.roughness = 0;
             (material as any).refractionRatio = 1.6;
             child.castShadow = true;
-            // material.envMap = new THREE.TextureLoader().load(skyTexture);
+            material.envMap = new THREE.TextureLoader().load(skyTexture);
             material.envMapIntensity = 1;
           }
 

@@ -31,12 +31,13 @@ class App extends React.Component {
     renderer.setSize(window.innerWidth, window.innerHeight);
     // renderer.setClearColor(new THREE.Color(0xffe5d4));
     renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(renderer.domElement);
 
     // scene
     const scene: THREE.Scene = new THREE.Scene();
     scene.background = new THREE.TextureLoader().load(skyTexture);
-    // scene.fog = new THREE.Fog(0xffffff, 10, 100);
+    // scene.fog = new THREE.Fog(0xffffff, 10, 600);
 
     // 显示坐标轴
     const axes = new THREE.AxesHelper(100);
@@ -370,14 +371,19 @@ class App extends React.Component {
     points.position.y = -15;
     points.scale.set(1.8, 1.8, 1.8);
     scene.add(points);
-    console.log(points, "[points]");
-    console.log(points.geometry.attributes.position.array, "[points.geometry]");
-    console.log(vertices, "[vertices]");
 
     // let pVertices = points.geometry.vertices;
 
     const trackballControls = this.initTrackballControls(camera, renderer);
     const clock = new THREE.Clock();
+
+    window.addEventListener('resize', onWindowResize, false);
+
+    function onWindowResize () {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
 
     this.renderScene({
       renderer,

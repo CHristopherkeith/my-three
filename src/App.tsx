@@ -43,7 +43,7 @@ class App extends React.Component {
     const axes = new THREE.AxesHelper(100);
     // scene.add(axes);
     scene.position.y = -20;
-    scene.scale.set(1.7,1.7,1.7)
+    scene.scale.set(1.2,1.2,1.2)
 
     // 平面
     const planeGeometry = new THREE.BoxGeometry(200, 1, 200);
@@ -81,7 +81,7 @@ class App extends React.Component {
 
     // 平行光源
     const directionalLight = new THREE.DirectionalLight("#ffffff", 1);
-    directionalLight.position.set(-50, 50, 50);
+    directionalLight.position.set(30, 50, 50);
     directionalLight.castShadow = true;
     directionalLight.target = cube;
     directionalLight.shadow.camera.near = 2;
@@ -106,10 +106,10 @@ class App extends React.Component {
       0.1,
       1000
     );
-    camera.position.set(-20, 85, 150);
+    camera.position.set(-20, 50, 120);
     // camera.zoom = 2
     camera.lookAt(scene.position);
-
+    // camera.lookAt((new THREE.Vector3(0, -20, 0))
     // 模型
     const loader = new GLTFLoader();
 
@@ -139,7 +139,7 @@ class App extends React.Component {
 
       mesh.scene.rotation.y = Math.PI / 4;
       mesh.scene.position.set(35, -15, 0);
-      mesh.scene.scale.set(2, 2, 2);
+      mesh.scene.scale.set(4, 2, 4);
 
       scene.add(mesh.scene);
     });
@@ -178,7 +178,7 @@ class App extends React.Component {
       });
 
       mesh.scene.rotation.y = -Math.PI / 12;
-      mesh.scene.position.set(-10, 0, 15);
+      mesh.scene.position.set(-10, 0, 45);
       mesh.scene.scale.set(100, 100, 100);
       scene.add(mesh.scene);
     });
@@ -193,7 +193,7 @@ class App extends React.Component {
       });
 
       mesh.scene.rotation.y = Math.PI / 8;
-      mesh.scene.position.set(-60, 10, 10);
+      mesh.scene.position.set(-60, 10, 20);
       mesh.scene.scale.set(40, 40, 40);
 
       scene.add(mesh.scene);
@@ -317,15 +317,15 @@ class App extends React.Component {
       fiveCyclesGroup.add(cycleMesh);
     });
 
-    fiveCyclesGroup.scale.set(0.1, 0.1, 0.1);
-    fiveCyclesGroup.position.set(0, 50, 0);
+    fiveCyclesGroup.scale.set(0.15, 0.15, 0.15);
+    fiveCyclesGroup.position.set(0, 60, -80);
     scene.add(fiveCyclesGroup);
 
     // 雪花
     const texture = new THREE.TextureLoader().load(snowTexture);
     const geometry = new THREE.BufferGeometry();
     const pointsMaterial = new THREE.PointsMaterial({
-      size: 3.5,
+      size: 2.5,
       transparent: true,
       opacity: 0.8,
       map: texture,
@@ -334,10 +334,10 @@ class App extends React.Component {
       depthTest: false,
     });
 
-    let range = 100;
+    let range = 150;
     let vertices: THREE.Vector3[] = [];
     // let vertices: number[] = [];
-    for (let i = 0; i < 1500; i++) {
+    for (let i = 0; i < 1300; i++) {
       let vertice = new THREE.Vector3(
         Math.random() * range - range / 2,
         Math.random() * range * 1.5,
@@ -369,7 +369,7 @@ class App extends React.Component {
     geometry.center();
     let points = new THREE.Points(geometry, pointsMaterial);
     points.position.y = -15;
-    points.scale.set(1.8, 1.8, 1.8);
+    points.scale.set(1.5, 1.5, 1.5);
     scene.add(points);
 
     // let pVertices = points.geometry.vertices;
@@ -394,6 +394,7 @@ class App extends React.Component {
       mixer: mixerObj,
       vertices,
       points,
+      fiveCyclesGroup
     });
   }
 
@@ -407,6 +408,7 @@ class App extends React.Component {
       clock: THREE.Clock;
       vertices: any[];
       points: THREE.Points;
+      fiveCyclesGroup: THREE.Group;
     }
   ) {
     // console.log(111)
@@ -419,10 +421,12 @@ class App extends React.Component {
       mixer,
       vertices,
       points,
+      fiveCyclesGroup,
     } = renderObj;
     trackballControls.update();
     requestAnimationFrame(this.renderScene.bind(this, renderObj));
     renderer.render(scene, camera);
+    fiveCyclesGroup && (fiveCyclesGroup.rotation.y += .01);
     // 雪花
     vertices.forEach(function (v) {
       v.y = v.y - v.velocityY;
@@ -462,6 +466,7 @@ class App extends React.Component {
     trackballControls.staticMoving = true;
     trackballControls.dynamicDampingFactor = 0.3;
     trackballControls.keys = ["65", "83", "68"];
+    // trackballControls.target.set(30, 0, 0);
 
     return trackballControls;
   }

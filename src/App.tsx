@@ -159,7 +159,7 @@ class App extends React.Component {
 
           if (child.name === "外壳") {
             material.transparent = true;
-            material.opacity = 0.4;
+            material.opacity = 0.2;
             material.metalness = 0.4;
             material.roughness = 0;
             (material as any).refractionRatio = 1.6;

@@ -27,8 +27,9 @@ class App extends React.Component {
   init() {
     // 渲染容器和渲染器
     const container = document.getElementById("container");
-    const renderer = new THREE.WebGLRenderer();
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio( window.devicePixelRatio ); 
     // renderer.setClearColor(new THREE.Color(0xffe5d4));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -313,7 +314,6 @@ class App extends React.Component {
 
       cycleMesh.castShadow = true;
       cycleMesh.position.set(item.position.x, item.position.y, item.position.z);
-      // meshes.push(cycleMesh);
       fiveCyclesGroup.add(cycleMesh);
     });
 
@@ -432,7 +432,8 @@ class App extends React.Component {
       v.y = v.y - v.velocityY;
       v.x = v.x - v.velocityX;
       if (v.y <= 0) v.y = 60;
-      if (v.x <= -20 || v.x >= 20) v.velocityX = v.velocityX * -1;
+      // if (v.x <= -20 || v.x >= 20) v.velocityX = v.velocityX * -1;
+      if (v.x <= -75 || v.x >= 75) v.velocityX = v.velocityX * -1
       // v[1] = v[1] - v.velocityY;
       // v[0] = v[0] - v.velocityX;
       // if (v[1] <= 0) v[1] = 60;
